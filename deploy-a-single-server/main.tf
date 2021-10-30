@@ -8,7 +8,7 @@ resource "aws_instance" "ec2_instance" {                       # https://registr
   vpc_security_group_ids = [aws_security_group.sg_instance.id] # References create implicit dependancies for execution (view via: terraform graph)
 
   # Add script to run on startup
-  user_data = <<EOF
+  user_data = <<-EOF
               #!/bin/bash
               echo "Hello, World" > index.html
               nohup busybox httpd -f -p 8080 &
