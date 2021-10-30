@@ -7,11 +7,11 @@ resource "aws_instance" "ec2_instance" {                       # https://registr
   instance_type          = "t2.micro"                          # AWS Free Tier EC2
   vpc_security_group_ids = [aws_security_group.sg_instance.id] # References create implicit dependancies for execution (view via: terraform graph)
 
-  # Add script to run on startup
-  user_data = <<-EOF
+  # Add script creating web server to run on startup
+  user_data = <<EOF
               #!/bin/bash
               echo "Hello, World" > index.html
-              nohup busybox httpd -f -p 8080 &
+              nohup busybox httpd -f -p ${var.server_port} &
               EOF
 
   tags = {
@@ -19,13 +19,14 @@ resource "aws_instance" "ec2_instance" {                       # https://registr
   }
 }
 
-resource "aws_security_group" "sg_instance" {
+resource "aws_security_group" "sg_instance" { # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group
   name = "terraform-example-sg"
 
+  # Setup inbound security group rule
   ingress {
-    cidr_blocks = [ "0.0.0.0/0" ]
-    from_port = 8080
-    protocol = "tcp"
-    to_port = 8080
-  } 
+    cidr_blocks = ["0.0.0.0/0"]
+    from_port   = var.server_port
+    protocol    = "tcp"
+    to_port     = var.server_port
+  }
 }
